@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Code Snippet Generator</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.25.0/prism.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const clearHistoryButton = document.querySelector('.clear-history');
+
+        clearHistoryButton.addEventListener('click', function (event) {
+            event.preventDefault(); // Prevent form submission if button is inside a form
+            fetch('/clear', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+            }).then(response => {
+                if (response.ok) {
+                    window.location.reload(); // Reload the page to update the history
+                }
+            }).catch(error => {
+                console.error('Error clearing history:', error);
+            });
+        });
+        document.querySelectorAll('.feedback-button').forEach(button => {
+        button.addEventListener('click', function () {
+            const snippetId = this.getAttribute('data-snippet-id');
+            const feedbackContainer = this.parentElement;
+            const feedback = this.getAttribute('data-feedback');
+            
+            fetch('/feedback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ snippetId, feedback }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Thank you for your feedback!');
+                feedbackContainer.querySelectorAll('.feedback-button').forEach(btn => btn.disabled = true); // Disable feedback buttons
+            })
+            .catch(error => {
+                console.error('Error submitting feedback:', error);
+            });
+        });
+    });
+
+        const chatContainer = document.getElementById('chat-container');
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    });
+
+
+</script>
+  <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: linear-gradient(to right, #6a11cb 0%, #2575fc 100%);
+        }
+        .chat-container {
+            width: 100%;
+            max-width: 900px;
+            height: 650px;
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            background-color: #ffffff;
+            color: #4a4a4a;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 22px;
+            font-weight: 600;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .chat-title {
+            text-align: center;
+        }
+        .clear-history {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            font-size: 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .clear-history:hover {
+            background-color: #c82333;
+        }
+        .messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #eaeff2;
+        }
+        .message {
+            max-width: 75%;
+            margin-bottom: 12px;
+            padding: 15px;
+            border-radius: 18px;
+            font-size: 16px;
+            line-height: 1.4;
+        }
+        .user-message {
+            background-color: #007bff;
+            color: #ffffff;
+            align-self: flex-end;
+            margin-left: 25%;
+        }
+        .bot-message {
+            background-color: #f1f1f1;
+            color: #4a4a4a;
+            align-self: flex-start;
+            margin-right: 25%;
+        }
+
+select {
+    width: 200px; /* Adjust width as needed */
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    background-color: white;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
+}
+
+select:hover {
+    border-color: #007bff;
+}
+
+select:focus {
+    outline: none;
+    border-color: #005ec2;
+    box-shadow: 0 0 8px rgba(0, 94, 194, 0.5);
+}
+
+/* Style options */
+option {
+    padding: 10px;
+    font-size: 16px;
+}
+
+.send {
+    flex-grow: 1;
+}
+        textarea {
+    width : 85%;
+    flex-grow: 2;
+    padding: 15px;
+    border: 1px solid #ccc;
+    background-color: #e5f0e9;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    margin-right: 10px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #333;
+    resize: none; /* Consider disabling resize if you want a consistent size */
+}
+
+button {
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+    background-color: #005ec2;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+
+
+.input-area select, 
+.input-area textarea, 
+.input-area button {
+    margin: 0 10px; /* Consistent margin for spacing */
+}
+
+.input-area select {
+    width: 35%; /* Adjust width to content */
+}
+
+.input-area textarea {
+    flex-grow: 2; /* Allow textarea to grow and take available space */
+    margin: 0; /* Remove margin for tight alignment */
+    padding: 10px; /* Consistent padding */
+    border-radius: 5px;
+}
+
+.input-area button {
+    padding: 10px 20px; /* Consistent padding */
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.input-area button:hover {
+    background-color: #005ec2;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+
+.input-area {
+    display: flex;
+    flex-direction: column; /* Stack children vertically */
+    padding: 10px;
+    background-color: #ffffff;
+    border-top: 2px solid #f0f0f0;
+}
+
+.select-container {
+    margin-bottom: 10px; /* Add some space below the select dropdown */
+}
+
+.form-container {
+    display: flex;
+    align-items: center; /* Align the textarea and button vertically */
+    justify-content: space-between; /* Space out the textarea and button */
+}
+
+.form-container textarea {
+    flex-grow: 2; /* Allow textarea to grow */
+    padding: 10px;
+    border-radius: 5px;
+    margin-right: 10px; /* Add space between textarea and button */
+}
+
+.form-container button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.form-container button:hover {
+    background-color: #005ec2;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.feedback-container {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.feedback-button {
+    margin: 0 5px;
+    background-color: #918e8e;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 5px 10px;
+    transition: background-color 0.2s;
+}
+
+.feedback-button:hover {
+    background-color: #e0e0e0;
+}
+
+.delete-snippet {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.delete-snippet:hover {
+    background-color: #ff1a1a;
+}
+
+
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <span class="chat-title">Code Snippet Generator</span>
+            <button class="clear-history" onclick="clearHistory()">Clear History</button>
+        </div>
+        <div class="messages" id="chat-container">
+            {% for item in history %}
+                <div class="message user-message">{{ item.prompt }}</div>
+                <div class="message bot-message">
+                    <pre><code class="language-javascript">{{ item.snippet }}</code></pre>
+                    <div class="feedback-container">
+                        <p>Was this helpful?</p>
+                        <button class="feedback-button" data-snippet-id="{{ item.id }}" data-feedback="positive">👍 Yes</button>
+                        <button class="feedback-button" data-snippet-id="{{ item.id }}" data-feedback="negative">👎 No</button>
+                        <form action="/delete-snippet" method="post" style="display: inline;">
+                            <input type="hidden" name="snippet_id" value="{{ item.id }}">
+                            <button type="submit" class="delete-snippet">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+       <div class="input-area">
+        <div class="input-area">
+            <div class="input-area">
+                <form id="snippetForm" method="POST">
+                    <div class="select-container">
+                        <select name="language" required title="Please select a programming language first">
+                            <option value="" disabled>Select Programming Language</option>
+                            <option value="Python" {% if selected_language == 'Python' %}selected{% endif %}>Python</option>
+                            <option value="JavaScript" {% if selected_language == 'JavaScript' %}selected{% endif %}>JavaScript</option>
+                            <option value="Java" {% if selected_language == 'Java' %}selected{% endif %}>Java</option>
+                            <option value="C#" {% if selected_language == 'C#' %}selected{% endif %}>C#</option>
+                            <option value="C++" {% if selected_language == 'C++' %}selected{% endif %}>C++</option>
+                        </select>
+                    </div>
+                    <div class="form-container">
+                        <textarea name="description" placeholder="Describe your coding problem here..."></textarea>
+                        <button id="sendButton" class="send" type="submit">Send</button>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+        
+</div>
+
+        
+   
+</div>
+</body>
+</html>
